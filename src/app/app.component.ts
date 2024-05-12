@@ -34,15 +34,16 @@ export class AppComponent implements OnInit, AfterViewInit {
   first_time = true;
   mediaRecorder;
 
-  ngOnInit() {}
-
-  ngAfterViewInit(): void {
+  ngOnInit() {
     navigator.mediaDevices.getUserMedia({
       video: { facingMode: this.front ? "user" : "environment", height:250, width:350 },
     }).then(data => {
       this.stream = data
       this.initVideoPlayer(this.stream)
     });
+  }
+
+  ngAfterViewInit(): void {
   }
 
   switchStream() {
