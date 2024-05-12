@@ -100,9 +100,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       console.warn('video/webm is not supported')
     }
 
-    this.mediaRecorder = new MediaRecorder(this.stream, { // <3>
-      mimeType: 'video/webm',
-    })
+    this.mediaRecorder = new MediaRecorder(this.stream)
 
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data && event.data.size > 0) {
