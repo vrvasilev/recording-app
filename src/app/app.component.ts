@@ -76,7 +76,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   startVideo() {
-    this.mediaRecorder.start(this.maxSize) // <4>
+    this.mediaRecorder.start(this.maxLength) // <4>
     // this.mediaRecordStopInterval = setInterval(()=>  { 
     //   clearInterval(this.requestDataInterval)
     //   this.mediaRecorder.stop()
