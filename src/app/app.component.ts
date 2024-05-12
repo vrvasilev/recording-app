@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { VideoPlayerComponent } from './video-player/video-player.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { timer } from 'rxjs';
 //ts-ignore
 @Component({
   selector: 'app-root',
@@ -77,11 +78,11 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   startVideo() {
     this.mediaRecorder.start() 
-    this.mediaRecordStopInterval = setInterval(()=>  { 
-      clearInterval(this.requestDataInterval)
-      this.mediaRecorder.stop()
-      clearInterval(this.mediaRecordStopInterval);
-     }, this.maxLength + 1000)
+    // this.mediaRecordStopInterval = setInterval(()=>  { 
+    //   clearInterval(this.requestDataInterval)
+    //   this.mediaRecorder.stop()
+    //   clearInterval(this.mediaRecordStopInterval);
+    //  }, this.maxLength + 1000)
 
     this.buttonStop.nativeElement.classList.add('btn-danger')
     this.buttonStart.nativeElement.setAttribute('disabled', '')
@@ -97,13 +98,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   initVideoPlayer(stream) {
-      try {
-      let track = stream.getVideoTracks()[0];
-      track.applyConstraints({
-        advanced: [{ torch: true }]
-      });
-    } catch(e) {}
-    this.loaded = true;
+    //   try {
+    //   let track = stream.getVideoTracks()[0];
+    //   track.applyConstraints({
+    //     advanced: [{ torch: true }]
+    //   });
+    // } catch(e) {}
+    // this.loaded = true;
 
 
     //@ts-ignore
@@ -128,21 +129,14 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     this.mediaRecorder.onstart = (e) => {
       this.requestDataInterval = setInterval(() => this.mediaRecorder.requestData(), 1000)
+      timer(this.maxLength).subscribe( () => this.stopVideo)
     }
 
     this.mediaRecorder.onstop = (e) => {
       clearInterval(this.requestDataInterval)
-      this.recordedBlobs = [];
       const blob = new Blob(this.recordedBlobs, { type: "video/mp4" });
       this.videoRecorded.nativeElement.src = URL.createObjectURL(blob);
-
+      this.recordedBlobs = [];
     }
   }
-}
-
-
-
-export const config = {
-  maxLength: 7000,
-  maxSize: 2000000
 }
