@@ -28,6 +28,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   requestDataInterval = null;
   mediaRecordStopInterval = null;
   stream = null;
+  loaded = false;
 
   front = false;
   first_time = true;
@@ -41,6 +42,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }).then(data => {
       this.stream = data
       this.initVideoPlayer(this.stream)
+      this.loaded = true;
     });
   }
 
@@ -67,13 +69,16 @@ export class AppComponent implements OnInit, AfterViewInit {
       clearInterval(this.requestDataInterval)
       this.mediaRecorder.stop()
      }, this.maxLength +1000)
-    
+     
+     this.buttonStop.nativeElement.classList.add('btn-danger')
     this.buttonStart.nativeElement.setAttribute('disabled', '')
     this.buttonStop.nativeElement.removeAttribute('disabled')
   }
 
   stopVideo() {
     this.mediaRecorder.stop()
+    this.buttonStop.nativeElement.classList.remove('btn-danger')
+
     this.buttonStart.nativeElement.removeAttribute('disabled')
     this.buttonStop.nativeElement.setAttribute('disabled', '')
   }
@@ -115,6 +120,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     this.mediaRecorder.onstop = (e) => {
       clearInterval(this.mediaRecordStopInterval)
+      clearInterval(this.requestDataInterval)
       const blob = new Blob(this.recordedBlobs, { type: "audio/ogg; codecs=opus" });
       //@ts-ignore
       this.videoRecorded.nativeElement.src = URL.createObjectURL(blob) // <6>

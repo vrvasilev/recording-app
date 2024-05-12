@@ -1,13 +1,15 @@
 <div class="d-flex gap-5 mt-3 flex-wrap">
   <div class="flex-row">
     <div>
+      Input video
       <video autoplay muted playsinline #videoLive></video>
     </div>
     <div>
+      Output video
       <video controls playsinline #videoRecorded></video>
     </div>
   </div>
-  <div class="flex-row flex-fill">
+  <div class="flex-row flex-fill" *ngIf="loaded">
     <div class="d-flex flex-column gap-5 w-100">
       <div class="d-flex gap-3 flex-row">
         <div class="d-flex flex-column gap-2 flex-fill">
@@ -15,7 +17,7 @@
             <div class="input-group-prepend">
               <span class="input-group-text" id="basic-addon1">Recording size in Bites</span>
             </div>
-          <input type="text"  [(ngModel)]="maxSize" class="form-control" placeholder="Enter maximum file recording size in Bites">
+          <input type="text" [(ngModel)]="maxSize" class="form-control" placeholder="Enter maximum file recording size in Bites">
           </div>
           <div class="input-group mb-3">
             <div class="input-group-prepend">
