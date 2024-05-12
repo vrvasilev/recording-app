@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, VideoPlayerComponent, CommonModule, FormsModule ],
+  imports: [RouterOutlet, VideoPlayerComponent, CommonModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -38,14 +38,14 @@ export class AppComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     if (MediaRecorder.isTypeSupported('video/mp4')) {
       // IOS does not support webm! So you have to use mp4.
-      this.outputMimeType = {mimeType: 'video/mp4', videoBitsPerSecond : 1000000};
-  } else {
+      this.outputMimeType = { mimeType: 'video/mp4', videoBitsPerSecond: 1000000 };
+    } else {
       // video/webm is recommended for non IOS devices
       console.error("ERROR: Is this really an IOS device??");
-      this.outputMimeType = {mimeType: 'video/webm'};
-  }
+      this.outputMimeType = { mimeType: 'video/webm' };
+    }
     navigator.mediaDevices.getUserMedia({
-      video: { facingMode: this.front ? "user" : "environment", height:250, width:350 },
+      video: { facingMode: this.front ? "user" : "environment", height: 250, width: 350 },
       audio: true
     }).then(data => {
       this.stream = data
@@ -68,19 +68,21 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     navigator.mediaDevices.getUserMedia({
       video: { facingMode: this.front ? "environment" : "user" },
-    }).then( data => {this.stream = data 
-      this.initVideoPlayer(this.stream) })
-   
+    }).then(data => {
+      this.stream = data
+      this.initVideoPlayer(this.stream)
+    })
+
   }
 
   startVideo() {
     this.mediaRecorder.start() // <4>
-    this.mediaRecordStopInterval = setInterval(()=>  { 
-      clearInterval(this.requestDataInterval)
-      this.mediaRecorder.stop()
-     }, this.maxLength +1000)
-     
-     this.buttonStop.nativeElement.classList.add('btn-danger')
+    // this.mediaRecordStopInterval = setInterval(()=>  { 
+    //   clearInterval(this.requestDataInterval)
+    //   this.mediaRecorder.stop()
+    //  }, this.maxLength + 1000)
+
+    this.buttonStop.nativeElement.classList.add('btn-danger')
     this.buttonStart.nativeElement.setAttribute('disabled', '')
     this.buttonStop.nativeElement.removeAttribute('disabled')
   }
@@ -94,13 +96,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   initVideoPlayer(stream) {
-    try {
-    let track = stream.getVideoTracks()[0];
-    track.applyConstraints({
-      advanced: [{ torch: true }]
-    });
-  } catch(e) {}
-  this.loaded = true;
+    //   try {
+    //   let track = stream.getVideoTracks()[0];
+    //   track.applyConstraints({
+    //     advanced: [{ torch: true }]
+    //   });
+    // } catch(e) {}
+    this.loaded = true;
 
 
     //@ts-ignore
@@ -118,21 +120,21 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.recordedBlobSize += event.data.size
         if (this.recordedBlobSize > this.maxSize) {
           console.log(this.recordedBlobSize)
-          this.mediaRecorder.stop() // <5>
+          // this.mediaRecorder.stop() // <5>
         }
       }
     }
 
     this.mediaRecorder.onstart = (e) => {
-      this.requestDataInterval = setInterval(() => this.mediaRecorder.requestData(), 1000)
+      // this.requestDataInterval = setInterval(() => this.mediaRecorder.requestData(), 1000)
     }
 
     this.mediaRecorder.onstop = (e) => {
-      clearInterval(this.mediaRecordStopInterval)
-      clearInterval(this.requestDataInterval)
-      const blob = new Blob(this.recordedBlobs, { type: "video/mp4" }) 
-        this.videoRecorded.nativeElement.src = URL.createObjectURL(blob) ;
-      
+      // clearInterval(this.mediaRecordStopInterval)
+      // clearInterval(this.requestDataInterval)
+      const blob = new Blob(this.recordedBlobs, { type: "video/mp4" })
+      this.videoRecorded.nativeElement.src = URL.createObjectURL(blob);
+
     }
   }
 }
