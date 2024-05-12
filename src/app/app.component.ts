@@ -37,6 +37,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     navigator.mediaDevices.getUserMedia({
       video: { facingMode: this.front ? "user" : "environment", height:250, width:350 },
+      audio: false
     }).then(data => {
       this.stream = data
       this.initVideoPlayer(this.stream)
@@ -100,7 +101,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       console.warn('video/webm is not supported')
     }
 
-    this.mediaRecorder = new MediaRecorder(this.stream)
+    this.mediaRecorder = new MediaRecorder(this.stream, {mimeType: 'video/mp4', videoBitsPerSecond : 1000000})
 
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data && event.data.size > 0) {
