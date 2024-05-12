@@ -98,12 +98,12 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   initVideoPlayer(stream) {
-      try {
-      let track = stream.getVideoTracks()[0];
-      track.applyConstraints({
-        advanced: [{ torch: true }]
-      });
-    } catch(e) {}
+    //   try {
+    //   let track = stream.getVideoTracks()[0];
+    //   track.applyConstraints({
+    //     advanced: [{ torch: true }]
+    //   });
+    // } catch(e) {}
     this.loaded = true;
 
 
@@ -129,7 +129,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     this.mediaRecorder.onstart = (e) => {
       this.requestDataInterval = setInterval(() => this.mediaRecorder.requestData(), 1000)
-      timer(this.maxLength).subscribe( () => this.stopVideo)
+      // timer(this.maxLength).subscribe( () => this.stopVideo)
     }
 
     this.mediaRecorder.onstop = (e) => {
@@ -137,6 +137,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       const blob = new Blob(this.recordedBlobs, { type: "video/mp4" });
       this.videoRecorded.nativeElement.src = URL.createObjectURL(blob);
       this.recordedBlobs = [];
+      this.recordedBlobSize = 0;
     }
   }
 }
