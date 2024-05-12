@@ -118,6 +118,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data && event.data.size > 0) {
+        this.recordedBlobs = [];
         this.recordedBlobs.push(event.data);
         this.recordedBlobSize += event.data.size
         if (this.recordedBlobSize > this.maxSize) {
@@ -128,16 +129,14 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     this.mediaRecorder.onstart = (e) => {
-      this.requestDataInterval = setInterval(() => this.mediaRecorder.requestData(), 1000)
+      // this.requestDataInterval = setInterval(() => this.mediaRecorder.requestData(), 1000)
       // timer(this.maxLength).subscribe( () => this.stopVideo)
     }
 
     this.mediaRecorder.onstop = (e) => {
-      clearInterval(this.requestDataInterval)
+      // clearInterval(this.requestDataInterval)
       const blob = new Blob(this.recordedBlobs, { type: "video/mp4" });
       this.videoRecorded.nativeElement.src = URL.createObjectURL(blob);
-      this.recordedBlobs = [];
-      this.recordedBlobSize = 0;
     }
   }
 }
