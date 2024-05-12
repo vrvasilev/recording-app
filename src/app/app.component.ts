@@ -116,6 +116,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data && event.data.size > 0) {
+        this.recordedBlobs = []
         this.recordedBlobs.push(event.data);
         this.recordedBlobSize += event.data.size
         if (this.recordedBlobSize > this.maxSize) {
