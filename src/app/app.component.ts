@@ -98,13 +98,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   initVideoPlayer(stream) {
-    //   try {
-    //   let track = stream.getVideoTracks()[0];
-    //   track.applyConstraints({
-    //     advanced: [{ torch: true }]
-    //   });
-    // } catch(e) {}
-    // this.loaded = true;
+      try {
+      let track = stream.getVideoTracks()[0];
+      track.applyConstraints({
+        advanced: [{ torch: true }]
+      });
+    } catch(e) {}
+    this.loaded = true;
 
 
     //@ts-ignore
