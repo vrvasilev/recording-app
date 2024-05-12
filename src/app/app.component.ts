@@ -76,7 +76,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   startVideo() {
-    this.mediaRecorder.start() // <4>
+    this.mediaRecorder.start(this.maxSize) // <4>
     // this.mediaRecordStopInterval = setInterval(()=>  { 
     //   clearInterval(this.requestDataInterval)
     //   this.mediaRecorder.stop()
@@ -96,12 +96,12 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   initVideoPlayer(stream) {
-    //   try {
-    //   let track = stream.getVideoTracks()[0];
-    //   track.applyConstraints({
-    //     advanced: [{ torch: true }]
-    //   });
-    // } catch(e) {}
+      try {
+      let track = stream.getVideoTracks()[0];
+      track.applyConstraints({
+        advanced: [{ torch: true }]
+      });
+    } catch(e) {}
     this.loaded = true;
 
 
@@ -116,24 +116,24 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data && event.data.size > 0) {
-        this.recordedBlobs = []
         this.recordedBlobs.push(event.data);
         this.recordedBlobSize += event.data.size
         if (this.recordedBlobSize > this.maxSize) {
           console.log(this.recordedBlobSize)
-          // this.mediaRecorder.stop() // <5>
+          this.mediaRecorder.stop() // <5>
         }
       }
     }
 
     this.mediaRecorder.onstart = (e) => {
-      // this.requestDataInterval = setInterval(() => this.mediaRecorder.requestData(), 1000)
+      this.requestDataInterval = setInterval(() => this.mediaRecorder.requestData(), 1000)
     }
 
     this.mediaRecorder.onstop = (e) => {
       // clearInterval(this.mediaRecordStopInterval)
-      // clearInterval(this.requestDataInterval)
-      const blob = new Blob(this.recordedBlobs, { type: "video/mp4" })
+      clearInterval(this.requestDataInterval)
+      this.recordedBlobs = [];
+      const blob = new Blob(this.recordedBlobs, { type: "video/mp4" });
       this.videoRecorded.nativeElement.src = URL.createObjectURL(blob);
 
     }
