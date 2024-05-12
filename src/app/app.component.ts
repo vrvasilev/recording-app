@@ -37,7 +37,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     navigator.mediaDevices.getUserMedia({
       video: { facingMode: this.front ? "user" : "environment", height:250, width:350 },
-      audio: false
+      audio: true
     }).then(data => {
       this.stream = data
       this.initVideoPlayer(this.stream)
