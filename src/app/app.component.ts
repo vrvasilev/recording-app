@@ -76,11 +76,12 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   startVideo() {
-    this.mediaRecorder.start(this.maxLength) // <4>
-    // this.mediaRecordStopInterval = setInterval(()=>  { 
-    //   clearInterval(this.requestDataInterval)
-    //   this.mediaRecorder.stop()
-    //  }, this.maxLength + 1000)
+    this.mediaRecorder.start() 
+    this.mediaRecordStopInterval = setInterval(()=>  { 
+      clearInterval(this.requestDataInterval)
+      this.mediaRecorder.stop()
+      clearInterval(this.mediaRecordStopInterval);
+     }, this.maxLength + 1000)
 
     this.buttonStop.nativeElement.classList.add('btn-danger')
     this.buttonStart.nativeElement.setAttribute('disabled', '')
@@ -130,7 +131,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     this.mediaRecorder.onstop = (e) => {
-      // clearInterval(this.mediaRecordStopInterval)
       clearInterval(this.requestDataInterval)
       this.recordedBlobs = [];
       const blob = new Blob(this.recordedBlobs, { type: "video/mp4" });
