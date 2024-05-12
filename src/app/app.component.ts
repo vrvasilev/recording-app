@@ -78,11 +78,11 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   startVideo() {
     this.mediaRecorder.start() 
-    // this.mediaRecordStopInterval = setInterval(()=>  { 
-    //   clearInterval(this.requestDataInterval)
-    //   this.mediaRecorder.stop()
-    //   clearInterval(this.mediaRecordStopInterval);
-    //  }, this.maxLength + 1000)
+    this.mediaRecordStopInterval = setInterval(()=>  { 
+      clearInterval(this.requestDataInterval)
+      this.mediaRecorder.stop()
+      clearInterval(this.mediaRecordStopInterval);
+     }, this.maxLength + 1000)
 
     this.buttonStop.nativeElement.classList.add('btn-danger')
     this.buttonStart.nativeElement.setAttribute('disabled', '')
@@ -110,15 +110,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     //@ts-ignore
     this.videoLive.nativeElement.srcObject = stream
 
-    if (!MediaRecorder.isTypeSupported('video/webm')) { // <2>
-      console.warn('video/webm is not supported')
-    }
-
     this.mediaRecorder = new MediaRecorder(this.stream, this.outputMimeType)
 
     this.mediaRecorder.ondataavailable = (event) => {
+      console.log('here 1 ')
       if (event.data && event.data.size > 0) {
-        this.recordedBlobs = [];
         this.recordedBlobs.push(event.data);
         this.recordedBlobSize += event.data.size
         if (this.recordedBlobSize > this.maxSize) {
@@ -129,14 +125,21 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
     this.mediaRecorder.onstart = (e) => {
-      // this.requestDataInterval = setInterval(() => this.mediaRecorder.requestData(), 1000)
-      timer(this.maxLength).subscribe( () => this.stopVideo)
+      this.requestDataInterval = setInterval(() => this.mediaRecorder.requestData(), 1000)
+      // timer(this.maxLength).subscribe( () => this.stopVideo())
     }
 
     this.mediaRecorder.onstop = (e) => {
-      // clearInterval(this.requestDataInterval)
+      console.log('here 2 ')
+      clearInterval(this.requestDataInterval)
       const blob = new Blob(this.recordedBlobs, { type: "video/mp4" });
       this.videoRecorded.nativeElement.src = URL.createObjectURL(blob);
+      
+    this.buttonStop.nativeElement.classList.remove('btn-danger')
+
+    this.buttonStart.nativeElement.removeAttribute('disabled')
+    this.buttonStop.nativeElement.setAttribute('disabled', '')
+      this.recordedBlobs = [];
     }
   }
 }
