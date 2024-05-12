@@ -22,7 +22,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('videoRecorded') videoRecorded;
 
   @Input() maxLength = 7000;
-  @Input() maxSize = 2000000;
+  @Input() maxSize = 5000000;
 
   recordedBlobs = [];
   recordedBlobSize = 0;
@@ -37,6 +37,16 @@ export class AppComponent implements OnInit, AfterViewInit {
   outputMimeType;
 
   ngOnInit() {
+    //@ts-ignore
+    navigator.permissions.query({ name: "camera" }).then((result) => {
+      if (result.state === "granted") {
+        alert('Camera is allowed')
+      } else if (result.state === "prompt") {
+        alert('Camera permission is disable')
+      }
+      // Don't do anything if the permission was denied.
+    });
+
     if (MediaRecorder.isTypeSupported('video/mp4')) {
       // IOS does not support webm! So you have to use mp4.
       this.outputMimeType = { mimeType: 'video/mp4', videoBitsPerSecond: 1000000 };
