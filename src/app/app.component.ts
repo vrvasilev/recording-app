@@ -33,8 +33,17 @@ export class AppComponent implements OnInit, AfterViewInit {
   front = false;
   first_time = true;
   mediaRecorder;
+  outputMimeType;
 
   ngOnInit() {
+    if (MediaRecorder.isTypeSupported('video/mp4')) {
+      // IOS does not support webm! So you have to use mp4.
+      this.outputMimeType = {mimeType: 'video/mp4', videoBitsPerSecond : 1000000};
+  } else {
+      // video/webm is recommended for non IOS devices
+      console.error("ERROR: Is this really an IOS device??");
+      this.outputMimeType = {mimeType: 'video/webm'};
+  }
     navigator.mediaDevices.getUserMedia({
       video: { facingMode: this.front ? "user" : "environment", height:250, width:350 },
       audio: true
@@ -101,7 +110,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       console.warn('video/webm is not supported')
     }
 
-    this.mediaRecorder = new MediaRecorder(this.stream, {mimeType: 'video/mp4', videoBitsPerSecond : 1000000})
+    this.mediaRecorder = new MediaRecorder(this.stream, this.outputMimeType)
 
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data && event.data.size > 0) {
