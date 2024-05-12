@@ -120,7 +120,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.mediaRecorder.onstop = (e) => {
       clearInterval(this.mediaRecordStopInterval)
       clearInterval(this.requestDataInterval)
-      const blob = new Blob(this.recordedBlobs, { type: "audio/ogg; codecs=opus" });
+      const blob = new Blob(this.recordedBlobs, { type: "audio/webm; codecs=opus" });
       //@ts-ignore
       this.videoRecorded.nativeElement.src = URL.createObjectURL(blob) // <6>
     }
