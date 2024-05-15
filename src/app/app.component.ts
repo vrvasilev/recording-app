@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { VideoPlayerComponent } from './video-player/video-player.component';
 import { CommonModule } from '@angular/common';
@@ -12,7 +12,7 @@ import { timer } from 'rxjs';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent implements OnInit, AfterViewInit {
+export class AppComponent implements OnInit, OnChanges {
 
   @ViewChild('buttonStart') buttonStart;
   @ViewChild('buttonStop') buttonStop;
@@ -42,9 +42,8 @@ export class AppComponent implements OnInit, AfterViewInit {
       if (result.state === "granted") {
         alert('Camera is allowed')
       } else if (result.state === "prompt") {
-        alert('Camera permission is disable')
+        alert('Camera permission is disableb')
       }
-      // Don't do anything if the permission was denied.
     });
 
     if (MediaRecorder.isTypeSupported('video/mp4')) {
@@ -64,7 +63,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     });
   }
 
-  ngAfterViewInit(): void {
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log(changes)
+    this.ngOnInit();
   }
 
   switchStream() {
