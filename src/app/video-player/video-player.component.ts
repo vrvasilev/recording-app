@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild, effect, signal } from '@angular/core';
 
 @Component({
   selector: 'app-video-player',
@@ -10,10 +10,6 @@ import { Component, Input, ViewChild } from '@angular/core';
 })
 export class VideoPlayerComponent {
 
-  @ViewChild('buttonStart') buttonStart;
-  @ViewChild('buttonStop') buttonStop;
-  @ViewChild('buttonSwitch') buttonSwitch;
-
   @ViewChild('videoLive') videoLive;
   @ViewChild('videoRecorded') videoRecorded;
 
@@ -22,7 +18,7 @@ export class VideoPlayerComponent {
 
   mediaRecorder: MediaRecorder = null;
   outputMimeType;
-  frontCameraFlag: boolean = false;
+  frontCameraFlag: boolean = true;
   stream;
 
   recordedBlobs = [];
@@ -32,8 +28,11 @@ export class VideoPlayerComponent {
   firstPhase: boolean = true;
   secondPhase: boolean = false;
   thirdPhase: boolean = false;
+
   switchVideoRecording: boolean = false;
-  switchTorch: boolean = false;
+  audio = new Audio("https://www.fesliyanstudios.com/play-mp3/780");
+
+  switchTorch = signal(false);
 
   currentDuration: number = 0;
   currentDurationInterval = null;
@@ -67,12 +66,12 @@ export class VideoPlayerComponent {
 
     this.mediaRecorder = new MediaRecorder(this.stream, this.outputMimeType)
 
-    this.mediaRecorder.ondataavailable = (event: BlobEvent ) => {
+    this.mediaRecorder.ondataavailable = (event: BlobEvent) => {
       if (event.data && event.data.size > 0) {
         this.recordedBlobs.push(event.data);
         this.recordedBlobSize += event.data.size
         if (this.recordedBlobSize > this.maxSize) {
-          this.mediaRecorder.stop() 
+          this.mediaRecorder.stop()
         }
       }
     }
@@ -84,9 +83,12 @@ export class VideoPlayerComponent {
     this.mediaRecorder.onstop = (e) => {
       clearInterval(this.requestDataInterval);
       clearInterval(this.currentDurationInterval);
+      clearInterval(this.mediaRecordStopInterval)
       const blob = new Blob(this.recordedBlobs, { type: "video/mp4" });
       this.videoRecorded.nativeElement.src = URL.createObjectURL(blob);
       this.recordedBlobs = [];
+      this.switchTorch.set(false);
+
     }
   }
 
@@ -96,7 +98,7 @@ export class VideoPlayerComponent {
     this.secondPhase = true;
     this.switchVideoRecording = false;
 
-    this.currentDurationInterval = setInterval( ()  => this.currentDuration += 1000, 1000)
+    this.currentDurationInterval = setInterval(() => this.currentDuration += 1000, 1000)
 
     this.mediaRecordStopInterval = setInterval(() => {
       clearInterval(this.requestDataInterval)
@@ -111,7 +113,7 @@ export class VideoPlayerComponent {
     this.thirdPhase = true;
     this.switchVideoRecording = true;
   }
-  
+
 
   switchStream() {
     if (this.stream) {
@@ -123,28 +125,38 @@ export class VideoPlayerComponent {
     this.frontCameraFlag = !this.frontCameraFlag;
 
     navigator.mediaDevices.getUserMedia({
-      video: { facingMode: this.frontCameraFlag ? "environment" : "user" },
+      video: { facingMode: this.frontCameraFlag ? "user" : "environment" },
+      audio: true,//possible iphone problem
     }).then(data => {
       this.stream = data
       this.initVideoPlayer(this.stream)
+      this.audio.play();
     })
   }
 
-  applyTorch() {
-    this.switchTorch = !this.switchTorch;
-    try {
+  torchEffect = effect(() => {
+    console.log('here')
+    let switchValue =this.switchTorch();
+    if (this.stream) {
       let track = this.stream.getVideoTracks()[0];
-      track.applyConstraints({
-        advanced: [{ torch: this.switchTorch }]
-      });
-    } catch (e) { }
+      try {
+        track.applyConstraints({
+          advanced: [{ torch: switchValue }]
+        });
+      } catch (e) { }
+    }
+  })
+
+  applyTorch() {
+    this.switchTorch.set(!this.switchTorch());
   }
 
   tryAgain() {
+    this.currentDuration = 0;
     this.firstPhase = true;
     this.thirdPhase = false;
     this.switchVideoRecording = false;
   }
 
-  done() {}
+  done() { }
 }
