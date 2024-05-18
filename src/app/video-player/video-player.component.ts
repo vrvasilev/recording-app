@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ViewChild, effect, signal } from '@angular/core';
+import { Component, HostListener, Input, ViewChild, computed, effect, signal } from '@angular/core';
 
 @Component({
   selector: 'app-video-player',
@@ -10,32 +10,50 @@ import { Component, Input, ViewChild, effect, signal } from '@angular/core';
 })
 export class VideoPlayerComponent {
 
+  @HostListener('document:visibilitychange', ['$event'])
+  visibilitychange() {
+    this.checkHiddenDocument();
+  }
+
+  checkHiddenDocument() {
+    if (document.hidden) {
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => {
+          track.stop()
+          track.enabled = false
+        })
+      }
+    }
+  }
+  
   @ViewChild('videoLive') videoLive;
   @ViewChild('videoRecorded') videoRecorded;
 
-  @Input() maxLength = 7000;
-  @Input() maxSize = 5000000;
+  @Input() maxLength: number = 7000;
+  @Input() maxSize: number = 5000000;
 
   mediaRecorder: MediaRecorder = null;
   outputMimeType;
-  frontCameraFlag: boolean = true;
-  stream;
+  frontCameraFlag = signal(true);
+  stream: MediaStream = null;
 
-  recordedBlobs = [];
-  recordedBlobSize = 0;
+  recordedBlobs: Blob[] = [];
+  recordedBlobSize: number = 0;
   requestDataInterval = null;
   mediaRecordStopInterval = null;
-  firstPhase: boolean = true;
-  secondPhase: boolean = false;
-  thirdPhase: boolean = false;
 
-  switchVideoRecording: boolean = false;
+  firstPhase =  signal(true);
+  secondPhase =  signal(false);
+  thirdPhase = computed(() => !(this.firstPhase() || this.secondPhase()));
+
+  switchVideoRecording = signal(false);
   audio = new Audio("https://www.fesliyanstudios.com/play-mp3/780");
 
   switchTorch = signal(false);
 
   currentDuration: number = 0;
   currentDurationInterval = null;
+
   ngOnInit() {
     //@ts-ignore
     // navigator.permissions.query({ name: "camera" }).then((result) => {
@@ -53,7 +71,7 @@ export class VideoPlayerComponent {
       this.outputMimeType = { mimeType: 'video/webm' };
     }
     navigator.mediaDevices.getUserMedia({
-      video: { facingMode: this.frontCameraFlag ? "user" : "environment" },
+      video: { facingMode: this.frontCameraFlag() ? "user" : "environment" },
       audio: true
     }).then(data => {
       this.stream = data
@@ -61,7 +79,7 @@ export class VideoPlayerComponent {
     });
   }
 
-  initVideoPlayer(stream) {
+  initVideoPlayer(stream: MediaStream) {
     this.videoLive.nativeElement.srcObject = stream
 
     this.mediaRecorder = new MediaRecorder(this.stream, this.outputMimeType)
@@ -88,15 +106,13 @@ export class VideoPlayerComponent {
       this.videoRecorded.nativeElement.src = URL.createObjectURL(blob);
       this.recordedBlobs = [];
       this.switchTorch.set(false);
-
     }
   }
 
-  startVideo() {
+  startVideo(): void {
     this.mediaRecorder.start()
-    this.firstPhase = false;
-    this.secondPhase = true;
-    this.switchVideoRecording = false;
+    this.firstPhase.set(false);
+    this.secondPhase.set(true);
 
     this.currentDurationInterval = setInterval(() => this.currentDuration += 1000, 1000)
 
@@ -107,55 +123,52 @@ export class VideoPlayerComponent {
     }, this.maxLength + 1000)
   }
 
-  stopVideo() {
+  stopVideo(): void {
     this.mediaRecorder.stop();
-    this.secondPhase = false;
-    this.thirdPhase = true;
-    this.switchVideoRecording = true;
+    this.secondPhase.set(false);
+    this.switchVideoRecording.set(true);
   }
 
 
-  switchStream() {
+  switchStream(): void {
     if (this.stream) {
       this.stream.getTracks().forEach(track => {
         track.stop()
         track.enabled = false
       })
     }
-    this.frontCameraFlag = !this.frontCameraFlag;
+    this.frontCameraFlag.set(!this.frontCameraFlag());
 
     navigator.mediaDevices.getUserMedia({
-      video: { facingMode: this.frontCameraFlag ? "user" : "environment" },
+      video: { facingMode: this.frontCameraFlag() ? "user" : "environment" },
       audio: true,//possible iphone problem
     }).then(data => {
       this.stream = data
       this.initVideoPlayer(this.stream)
       this.audio.play();
     })
-  }
+  };
 
   torchEffect = effect(() => {
-    console.log('here')
-    let switchValue =this.switchTorch();
+    let switchValue = this.switchTorch();
     if (this.stream) {
-      let track = this.stream.getVideoTracks()[0];
+      let track: MediaStreamTrack = this.stream.getVideoTracks()[0];
       try {
         track.applyConstraints({
-          advanced: [{ torch: switchValue }]
+          advanced: [{ torch: switchValue } as MediaTrackConstraints]
         });
       } catch (e) { }
     }
   })
 
-  applyTorch() {
+  applyTorch(): void {
     this.switchTorch.set(!this.switchTorch());
   }
 
-  tryAgain() {
+  tryAgain(): void {
     this.currentDuration = 0;
-    this.firstPhase = true;
-    this.thirdPhase = false;
-    this.switchVideoRecording = false;
+    this.firstPhase.set(true);
+    this.switchVideoRecording.set(false);
   }
 
   done() { }

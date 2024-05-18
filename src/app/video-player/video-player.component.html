@@ -6,9 +6,9 @@
                 <path
                     d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
             </svg>
-            <div class="d-flex flex-row justify-content-between" style="width: 20%;">
-                <svg *ngIf="!thirdPhase" xmlns="http://www.w3.org/2000/svg" (click)="switchStream()" width="16" fill="white"
-                    class="bi bi-camera menu-svg" viewBox="0 0 16 16">
+            <div class="d-flex flex-row justify-content-between gap-2">
+                <svg *ngIf="!thirdPhase" xmlns="http://www.w3.org/2000/svg" (click)="switchStream()" width="16"
+                    fill="white" class="bi bi-camera menu-svg" viewBox="0 0 16 16">
                     <path
                         d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4z" />
                     <path
@@ -24,28 +24,31 @@
         </div>
     </div>
     <div class="d-flex" style="height:80dvh;">
-        <div class="row">
-            <video class="" autoplay muted playsinline #videoLive style="width: 100%; object-fit: cover;"
-                [hidden]="switchVideoRecording"></video>
-            <video class="" controls playsinline #videoRecorded [hidden]="!switchVideoRecording"
-                style="object-fit: cover;"></video>
+        <div class="flex-row w-100">
+            <video class="" autoplay muted playsinline #videoLive style="width: 100%; object-fit: cover; height: 80dvh;"
+                [hidden]="switchVideoRecording()"></video>
+            <video class="" controls playsinline #videoRecorded [hidden]="!switchVideoRecording()"
+                style="width: 100%; object-fit: cover; height: 80dvh;"></video>
         </div>
     </div>
-    <div class="d-flex bg-dark height-25 align-items-center justify-content-between px-2" style="height:10dvh">
-        <svg *ngIf="firstPhase" (click)="startVideo()" #buttonStart xmlns="http://www.w3.org/2000/svg" width="16"
-            fill="white" class="bi bi-play-circle-fill start-menu-svg" viewBox="0 0 16 16">
-            <path
-                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814z" />
-        </svg>
+    <div class="d-flex bg-dark align-items-center justify-content-between px-2 pt-2 pb-2 z-1" style="height:10dvh">
+        <div *ngIf="firstPhase()" class="d-flex w-100 justify-content-center">
+            <svg (click)="startVideo()" xmlns="http://www.w3.org/2000/svg" width="16" fill="white"
+                class="bi bi-record-circle start-menu-svg" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                <path d="M11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+            </svg>
+        </div>
 
-        <svg *ngIf="secondPhase" (click)="stopVideo()" #buttonStop xmlns="http://www.w3.org/2000/svg" width="16"
-            fill="white" class="bi bi-square start-menu-svg" viewBox="0 0 16 16">
+        <svg *ngIf="secondPhase()" (click)="stopVideo()" xmlns="http://www.w3.org/2000/svg" width="16" fill="white" class="bi bi-stop-circle start-menu-svg"
+            viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
             <path
-                d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                d="M5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5z" />
         </svg>
-        <span *ngIf="secondPhase" class="text-danger">{{ currentDuration | date:'mm:ss' }}</span>
+        <span *ngIf="secondPhase()" class="text-danger">{{ currentDuration | date:'mm:ss' }}</span>
 
-        <span *ngIf="thirdPhase" (click)="tryAgain()" style="color:white;font-size: 32px;"> Try again </span>
-        <span *ngIf="thirdPhase" (clic)="done()" style="color:white;font-size: 32px;"> Done </span>
+        <span *ngIf="thirdPhase()" (click)="tryAgain()" class="text-secondary"> Try Again </span>
+        <span *ngIf="thirdPhase()" (clic)="done()" class="text-light"> DONE </span>
     </div>
 </div>
