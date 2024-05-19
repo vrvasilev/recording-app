@@ -10,21 +10,21 @@ import { Component, HostListener, Input, ViewChild, computed, effect, signal } f
 })
 export class VideoPlayerComponent {
 
-  @HostListener('document:visibilitychange', ['$event'])
-  visibilitychange() {
-    this.checkHiddenDocument();
-  }
+  // @HostListener('document:visibilitychange', ['$event'])
+  // visibilitychange() {
+  //   this.checkHiddenDocument();
+  // }
 
-  checkHiddenDocument() {
-    if (document.hidden) {
-      if (this.stream) {
-        this.stream.getTracks().forEach(track => {
-          track.stop()
-          track.enabled = false
-        })
-      }
-    }
-  }
+  // checkHiddenDocument() {
+  //   if (document.hidden) {
+  //     if (this.stream) {
+  //       this.stream.getTracks().forEach(track => {
+  //         track.stop()
+  //         track.enabled = false
+  //       })
+  //     }
+  //   }
+  // }
   
   @ViewChild('videoLive') videoLive;
   @ViewChild('videoRecorded') videoRecorded;
@@ -81,7 +81,8 @@ export class VideoPlayerComponent {
 
   initVideoPlayer(stream: MediaStream) {
     this.videoLive.nativeElement.srcObject = stream
-
+    this.videoLive.nativeElement.muted = true
+    
     this.mediaRecorder = new MediaRecorder(this.stream, this.outputMimeType)
 
     this.mediaRecorder.ondataavailable = (event: BlobEvent) => {
