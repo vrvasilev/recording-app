@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, Input, ViewChild, computed, effect, signal } from '@angular/core';
+import { Component, Input, ViewChild, computed, effect, signal } from '@angular/core';
 
 @Component({
   selector: 'app-video-player',
@@ -16,10 +16,13 @@ export class VideoPlayerComponent {
   @Input() maxLength: number = 7000;
   @Input() maxSize: number = 5000000;
 
-  mediaRecorder: MediaRecorder = null;
-  outputMimeType;
+  mediaRecorder: MediaRecorder;
+  outputMimeType: MediaRecorderOptions;
+  stream: MediaStream;
+
   frontCameraFlag = signal(true);
-  stream: MediaStream = null;
+  desktopCameraFlag = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 
   recordedBlobs: Blob[] = [];
   recordedBlobSize: number = 0;
@@ -39,6 +42,7 @@ export class VideoPlayerComponent {
   currentDurationInterval = null;
 
   ngOnInit() {
+    console.log(this.desktopCameraFlag)
     //@ts-ignore
     // navigator.permissions.query({ name: "camera" }).then((result) => {
     //   if (result.state === "granted") {
