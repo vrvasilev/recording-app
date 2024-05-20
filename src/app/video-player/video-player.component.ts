@@ -1,20 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ViewChild, computed, effect, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, ViewChild, computed, effect, signal } from '@angular/core';
 
 @Component({
   selector: 'app-video-player',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './video-player.component.html',
-  styleUrl: './video-player.component.css'
+  styleUrl: './video-player.component.css',
+  // changeDetection: ChangeDetectionStrategy.OnPush,
+
 })
 export class VideoPlayerComponent {
-  
+
   @ViewChild('videoLive') videoLive;
   @ViewChild('videoRecorded') videoRecorded;
 
   @Input() maxLength: number = 7000;
-  @Input() maxSize: number = 5000000;
+  @Input() maxSize: number = 500;
 
   mediaRecorder: MediaRecorder;
   outputMimeType: MediaRecorderOptions;
@@ -29,8 +31,8 @@ export class VideoPlayerComponent {
   requestDataInterval = null;
   mediaRecordStopInterval = null;
 
-  firstPhase =  signal(true);
-  secondPhase =  signal(false);
+  firstPhase = signal(true);
+  secondPhase = signal(false);
   thirdPhase = computed(() => !(this.firstPhase() || this.secondPhase()));
 
   switchVideoRecording = signal(false);
@@ -40,6 +42,10 @@ export class VideoPlayerComponent {
 
   currentDuration: number = 0;
   currentDurationInterval = null;
+
+  constructor(private ref: ChangeDetectorRef) {
+
+  }
 
   ngOnInit() {
     console.log(this.desktopCameraFlag)
@@ -77,8 +83,12 @@ export class VideoPlayerComponent {
       if (event.data && event.data.size > 0) {
         this.recordedBlobs.push(event.data);
         this.recordedBlobSize += event.data.size
-        if (this.recordedBlobSize > this.maxSize) {
+        console.log(this.recordedBlobSize )
+
+        if (this.recordedBlobSize / 1000 > this.maxSize) {
+          this.recordedBlobSize = 0
           this.mediaRecorder.stop()
+
         }
       }
     }
@@ -95,27 +105,33 @@ export class VideoPlayerComponent {
       this.videoRecorded.nativeElement.src = URL.createObjectURL(blob);
       this.recordedBlobs = [];
       this.switchTorch.set(false);
+      this.secondPhase.set(false);
+      this.switchVideoRecording.set(true);
+      this.ref.detectChanges();
     }
   }
 
   startVideo(): void {
+
     this.mediaRecorder.start()
     this.firstPhase.set(false);
     this.secondPhase.set(true);
 
-    this.currentDurationInterval = setInterval(() => this.currentDuration += 1000, 1000)
+    this.currentDurationInterval = setInterval(() => {this.currentDuration += 1000
+      this.ref.detectChanges();
+    }, 1000)
 
     this.mediaRecordStopInterval = setInterval(() => {
       clearInterval(this.requestDataInterval)
       this.stopVideo();
       clearInterval(this.mediaRecordStopInterval);
     }, this.maxLength + 1000)
+    this.ref.detectChanges();
+
   }
 
   stopVideo(): void {
     this.mediaRecorder.stop();
-    this.secondPhase.set(false);
-    this.switchVideoRecording.set(true);
   }
 
 
@@ -136,6 +152,8 @@ export class VideoPlayerComponent {
       this.initVideoPlayer(this.stream)
       this.audio.play();
     })
+    this.ref.detectChanges();
+
   };
 
   torchEffect = effect(() => {
@@ -152,12 +170,16 @@ export class VideoPlayerComponent {
 
   applyTorch(): void {
     this.switchTorch.set(!this.switchTorch());
+    this.ref.detectChanges();
+
   }
 
   tryAgain(): void {
     this.currentDuration = 0;
     this.firstPhase.set(true);
     this.switchVideoRecording.set(false);
+    this.ref.detectChanges();
+
   }
 
   done() { }

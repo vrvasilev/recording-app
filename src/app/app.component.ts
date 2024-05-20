@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { VideoPlayerComponent } from './video-player/video-player.component';
 import { CommonModule } from '@angular/common';
@@ -14,6 +14,13 @@ import { timer } from 'rxjs';
 })
 export class AppComponent {
 
+  recording = signal(true)
+  duration = signal(10000)
+  size = signal(5000)
+
+  recordingStarting() {
+    this.recording.set(false)
+  }
   // @ViewChild('buttonStart') buttonStart;
   // @ViewChild('buttonStop') buttonStop;
   // @ViewChild('buttonSwitch') buttonSwitch;
