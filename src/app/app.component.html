@@ -13,7 +13,7 @@
       </div>
     </div>
     <div class="form-check">
-      <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+      <input [(ngModel)]="preview" class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
       <label class="form-check-label" for="flexCheckDefault">
         Preview before saving
       </label>
@@ -23,7 +23,9 @@
 </div>
 }
 @else {
-  <app-video-player [maxLength]="duration()" [maxSize]="size()"></app-video-player>
+  <app-video-player [maxLength]="duration()" [maxSize]="size()" [previewSelected]="preview()" (cancelRecording)="cancelRecording($event)" (recordingFile)="recordingFile($event)"></app-video-player>
+  <!-- <lib-ngx-recording-lib></lib-ngx-recording-lib> -->
+
 }
 <!-- <div class="d-flex gap-5 mt-3 flex-wrap">
   <div class="flex-row">

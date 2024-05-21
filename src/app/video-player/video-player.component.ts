@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, ViewChild, computed, effect, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild, computed, effect, signal } from '@angular/core';
 
 @Component({
   selector: 'app-video-player',
@@ -17,6 +17,10 @@ export class VideoPlayerComponent {
 
   @Input() maxLength: number = 7000;
   @Input() maxSize: number = 500;
+  @Input() previewSelected: boolean = false;
+
+  @Output() cancelRecording = new EventEmitter<boolean>();
+  @Output() recordingFile = new EventEmitter();
 
   mediaRecorder: MediaRecorder;
   outputMimeType: MediaRecorderOptions;
@@ -27,6 +31,8 @@ export class VideoPlayerComponent {
 
 
   recordedBlobs: Blob[] = [];
+  lastRecordedBlob: Blob[] = [];
+
   recordedBlobSize: number = 0;
   requestDataInterval = null;
   mediaRecordStopInterval = null;
@@ -48,7 +54,7 @@ export class VideoPlayerComponent {
   }
 
   ngOnInit() {
-    console.log(this.desktopCameraFlag)
+    console.log(this.previewSelected)
     //@ts-ignore
     // navigator.permissions.query({ name: "camera" }).then((result) => {
     //   if (result.state === "granted") {
@@ -83,12 +89,9 @@ export class VideoPlayerComponent {
       if (event.data && event.data.size > 0) {
         this.recordedBlobs.push(event.data);
         this.recordedBlobSize += event.data.size
-        console.log(this.recordedBlobSize )
-
         if (this.recordedBlobSize / 1000 > this.maxSize) {
           this.recordedBlobSize = 0
           this.mediaRecorder.stop()
-
         }
       }
     }
@@ -103,21 +106,31 @@ export class VideoPlayerComponent {
       clearInterval(this.mediaRecordStopInterval)
       const blob = new Blob(this.recordedBlobs, { type: "video/mp4" });
       this.videoRecorded.nativeElement.src = URL.createObjectURL(blob);
+      this.lastRecordedBlob = this.recordedBlobs;
       this.recordedBlobs = [];
       this.switchTorch.set(false);
+      // this.secondPhase.set(false);
+      // this.switchVideoRecording.set(true);
       this.secondPhase.set(false);
-      this.switchVideoRecording.set(true);
+      if (this.previewSelected) {
+        this.switchVideoRecording.set(true);
+      } else {
+        this.currentDuration = 0;
+        this.firstPhase.set(true);
+        this.switchVideoRecording.set(false);
+        this.recordingFile.emit(this.lastRecordedBlob);
+      }
       this.ref.detectChanges();
     }
   }
 
   startVideo(): void {
-
     this.mediaRecorder.start()
     this.firstPhase.set(false);
     this.secondPhase.set(true);
 
-    this.currentDurationInterval = setInterval(() => {this.currentDuration += 1000
+    this.currentDurationInterval = setInterval(() => {
+      this.currentDuration += 1000
       this.ref.detectChanges();
     }, 1000)
 
@@ -127,11 +140,19 @@ export class VideoPlayerComponent {
       clearInterval(this.mediaRecordStopInterval);
     }, this.maxLength + 1000)
     this.ref.detectChanges();
-
   }
 
   stopVideo(): void {
     this.mediaRecorder.stop();
+    // this.secondPhase.set(false);
+    // if(this.previewSelected) {
+    //   this.switchVideoRecording.set(true);
+    // } else {
+    //   this.currentDuration = 0;
+    //   this.firstPhase.set(true);
+    //   this.switchVideoRecording.set(false);
+    // } 
+    // this.ref.detectChanges();
   }
 
 
@@ -146,7 +167,7 @@ export class VideoPlayerComponent {
 
     navigator.mediaDevices.getUserMedia({
       video: { facingMode: this.frontCameraFlag() ? "user" : "environment" },
-      audio: true,//possible iphone problem
+      audio: true,
     }).then(data => {
       this.stream = data
       this.initVideoPlayer(this.stream)
@@ -171,7 +192,6 @@ export class VideoPlayerComponent {
   applyTorch(): void {
     this.switchTorch.set(!this.switchTorch());
     this.ref.detectChanges();
-
   }
 
   tryAgain(): void {
@@ -182,5 +202,12 @@ export class VideoPlayerComponent {
 
   }
 
-  done() { }
+  done(): void {
+    this.ref.detectChanges();
+    this.recordingFile.emit(this.lastRecordedBlob);
+  }
+
+  closeRecording(): void {
+    this.cancelRecording.emit(true);
+  }
 }

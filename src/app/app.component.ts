@@ -4,23 +4,34 @@ import { VideoPlayerComponent } from './video-player/video-player.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { timer } from 'rxjs';
+import { NgxRecordingLibComponent } from 'ngx-recording-lib';
 //ts-ignore
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, VideoPlayerComponent, CommonModule, FormsModule],
+  imports: [RouterOutlet, VideoPlayerComponent, CommonModule, FormsModule, NgxRecordingLibComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
 
-  recording = signal(true)
-  duration = signal(10000)
-  size = signal(5000)
+  recording = signal(true);
+  duration = signal(10000);
+  size = signal(5000);
+  preview = signal(false);
 
-  recordingStarting() {
+  recordingStarting(): void {
     this.recording.set(false)
   }
+
+  cancelRecording(event): void {
+    this.recording.set(true)
+  }
+
+  recordingFile(event): void {
+    console.log(event)
+  }
+
   // @ViewChild('buttonStart') buttonStart;
   // @ViewChild('buttonStop') buttonStop;
   // @ViewChild('buttonSwitch') buttonSwitch;
